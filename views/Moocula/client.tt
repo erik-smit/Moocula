@@ -1,0 +1,18 @@
+<!-- HEADER line -->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h1 class="page-header">[% client %]</h1>
+
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Timestamp</th><th>Numfiles</th>
+      </tr>
+    </thead>
+    [% FOREACH backup IN backups %]
+    <tr>
+      <td><a href="[% request.uri_for("/browse", client => client, id => backup.jobid) %]">[% backup.timestamp %]</a></td>
+      <td>[% backup.numfiles %]</td>
+    </tr>
+    [% END %]
+  </table>
+</div>

@@ -1,0 +1,21 @@
+<!-- HEADER line -->
+<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+  <h1 class="page-header">[% client %]</h1>
+
+  <table class="table table-striped table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Path</th>
+      </tr>
+    </thead>
+    [% FOREACH file IN files %]
+    <tr>
+      [% IF file.filenameid %]
+      <td><a href="[% request.uri_for("/download", client => client, id => jobid, filenameid => file.filenameid) %]">[% file.path %]</a></td>
+      [% ELSE %]
+      <td><a href="[% request.uri_for("/browse", client => client, id => jobid, pathid => file.pathid) %]">[% file.path %]</a></td>
+      [% END %]
+    </tr>
+    [% END %]
+  </table>
+</div>
