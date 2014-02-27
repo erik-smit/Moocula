@@ -1,4 +1,5 @@
 package Bacula::Director;
+use parent 'Bacula';
 
 # Scaffolding copied from Redis.pm
 
@@ -11,6 +12,7 @@ use Try::Tiny;
 use IO::Socket::UNIX;
 use Digest::HMAC_MD5 qw(hmac_md5 hmac_md5_hex);
 use Digest::MD5 qw(md5 md5_hex md5_base64);
+use Scalar::Util qw(looks_like_number);
 
 sub new {
   my ($class, %args) = @_;
@@ -53,7 +55,9 @@ sub __read_lines {
 
   my @lines;
 
-  while (my $line = $self->__read_line) {
+  while (1) {
+    my $line = $self->__read_line;
+    if (looks_like_number($line) && $line < 0) { warn "DONE!\n"; last; }
     if ($line =~ /^You have messages\.$/) { next; }
     if ($line =~ /^Using Catalog/) { next; }
     push (@lines, $line);
@@ -72,7 +76,7 @@ sub __read_line {
 
   if ($length < 0) {
     warn "[RECV] length = $length" if $self->{debug};
-    return;
+    return $length;
   }
 
   my $data;
@@ -118,8 +122,9 @@ our $AUTOLOAD;
 sub AUTOLOAD {
   my $command = $AUTOLOAD;
   $command =~ s/.*://;
+  $command =~ s/^dot/\./;
 
-  my $method = sub { shift->__std_cmd(".".$command, @_) };
+  my $method = sub { shift->__std_cmd($command, @_) };
 
   # Save this method for future calls
   no strict 'refs';

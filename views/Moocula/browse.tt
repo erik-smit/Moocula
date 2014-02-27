@@ -11,7 +11,7 @@
     [% FOREACH file IN files %]
     <tr>
       [% IF file.filenameid %]
-      <td><a href="[% request.uri_for("/download", client => client, id => jobid, filenameid => file.filenameid) %]">[% file.path %]</a></td>
+      <td><a href="[% request.uri_for("/download", client => client, id => jobid, fileid => file.fileid) %]">[% file.path %]</a></td>
       [% ELSE %]
       <td><a href="[% request.uri_for("/browse", client => client, id => jobid, pathid => file.pathid) %]">[% file.path %]</a></td>
       [% END %]
