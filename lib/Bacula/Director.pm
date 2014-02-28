@@ -57,7 +57,7 @@ sub __read_lines {
 
   while (1) {
     my $line = $self->__read_line;
-    if (looks_like_number($line) && $line < 0) { warn "DONE!\n"; last; }
+    if (looks_like_number($line) && $line < 0) { last; }
     if ($line =~ /^You have messages\.$/) { next; }
     if ($line =~ /^Using Catalog/) { next; }
     push (@lines, $line);

@@ -77,7 +77,7 @@ get '/client' => sub {
 };
 
 get '/clients' => sub {
-    my @clients;
+  my @clients = bacula_director->dotclients;
 
 # Only list clients that have backups
 #    foreach my $fileset (bacula_director->dotfilesets) {
@@ -88,7 +88,6 @@ get '/clients' => sub {
 #	}
 #      }
 #    }
-    my @clients = bacula_director->dotclients;
 
 #  @clients = bacula_director->sqlquery("SELECT client.clientid, client.name FROM client INNER JOIN job ON (client.clientid=job.clientid) WHERE job.jobstatus='T' GROUP BY client.clientid ORDER BY client.name");
 
