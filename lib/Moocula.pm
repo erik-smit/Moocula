@@ -30,6 +30,7 @@ get '/browse' => sub {
     my $selector = $pathid ? "pathid=$pathid" : 'path="/"';
     my ($alljobid) = bacula_director->dotbvfs_get_jobids("jobid=$jobid");
 
+    if ($alljobid eq "") {$alljobid=$jobid; }
     foreach my $line (
         bacula_director->dotbvfs_lsdirs("$selector jobid=$alljobid"),
         bacula_director->dotbvfs_lsfiles("$selector jobid=$alljobid")
