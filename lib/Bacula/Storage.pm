@@ -73,11 +73,10 @@ sub __read_msg {
 
   warn "[RECV] waiting for data.\n" if $self->{debug};
   my $header;
-  $sock->read($header, 4);
-  my $length = unpack 's', pack 'S', unpack "N", $header;
-
-  if ($length < 0) {
-    warn "[RECV] length = $length" if $self->{debug};
+  $sock->sysread($header, 4);
+  my $length = unpack "N", $header;
+  warn "[RECV] length = ".Dumper($length)."length" if $self->{debug};
+  if ($length >= 4294967295) {
     return;
   }
 
