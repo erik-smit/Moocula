@@ -34,20 +34,20 @@ get '/browse' => sub {
     foreach my $line (
         bacula_director->dotbvfs_lsdirs("$selector jobid=$alljobid"),
         bacula_director->dotbvfs_lsfiles("$selector jobid=$alljobid")
-      )
+        )
     {
-        my ( $PathId, $FilenameId, $FileId, $JobId, $LStat, $Path ) =
-          split( /\t/, $line );
+        my ( $PathId, $FilenameId, $FileId, $JobId, $LStat, $Path )
+            = split( /\t/, $line );
         push @files,
-          {
-            pathid => $PathId,
-            fileid => $FileId,
+            {
+            pathid     => $PathId,
+            fileid     => $FileId,
             filenameid => $FilenameId,
-            path   => $Path
-          };
+            path       => $Path
+            };
     }
     template 'Moocula/browse.tt',
-      { client => $client, jobid => $jobid, files => \@files };
+        { client => $client, jobid => $jobid, files => \@files };
 };
 
 get '/client' => sub {
@@ -57,20 +57,19 @@ get '/client' => sub {
         foreach my $line (
             bacula_director->dotbackups("client=$client fileset=$fileset") )
         {
-            my (
-                $fart,     $jobid,    $client,   $level, $timestamp,
+            my ($fart,     $jobid,    $client,   $level, $timestamp,
                 $numfiles, $numbytes, $volumeid, $storage
             ) = split( /\ *\|\ */, $line );
 
             unshift @backups,
-              {
+                {
                 jobid     => $jobid,
                 client    => $client,
                 timestamp => $timestamp,
                 numfiles  => $numfiles,
                 volumeid  => $volumeid,
                 storage   => $storage
-              };
+                };
         }
     }
 
@@ -78,7 +77,7 @@ get '/client' => sub {
 };
 
 get '/clients' => sub {
-  my @clients = bacula_director->dotclients;
+    my @clients = bacula_director->dotclients;
 
 # Only list clients that have backups
 #    foreach my $fileset (bacula_director->dotfilesets) {
@@ -123,29 +122,29 @@ get '/download' => sub {
                 my $fileindex = $lines[0][1];
                 my $filename  = $lines[0][2];
 
- 		$fileindex =~ s/,//g;
+                $fileindex =~ s/,//g;
 
                 my $http_status_code = 200;
                 my @http_headers     = (
                     'Content-Type'        => 'text/plain',
                     'Content-Disposition' => 'attachment; filename="'
-                      . $filename . '"',
+                        . $filename . '"',
 
                     'Last-Modified' =>
-                      strftime( "%a, %d %b %Y %H:%M:%S GMT", gmtime ),
+                        strftime( "%a, %d %b %Y %H:%M:%S GMT", gmtime ),
                     'Expires' => 'Tue, 03 Jul 2001 06:00:00 GMT',
                     'Cache-Control' =>
-                      'no-store, no-cache, must-revalidate, max-age=0',
+                        'no-store, no-cache, must-revalidate, max-age=0',
                     'Pragma' => 'no-cache'
                 );
 
-                my $writer =
-                  $respond->( [ $http_status_code, \@http_headers ] );
+                my $writer
+                    = $respond->( [ $http_status_code, \@http_headers ] );
 
-                bacula_storage->lezen_pre($volume, $fileindex);
-    
-                while(my $data = bacula_storage->lezen_stream()) {
-                  $writer->write( $data ); 
+                bacula_storage->lezen_pre( $volume, $fileindex );
+
+                while ( my $data = bacula_storage->lezen_stream()) {
+                    $writer->write($data);
                 }
 
                 bacula_storage->lezen_post();
@@ -153,6 +152,7 @@ get '/download' => sub {
             },
         },
     );
+
 };
 
 true;
