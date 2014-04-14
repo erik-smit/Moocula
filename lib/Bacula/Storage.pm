@@ -81,11 +81,14 @@ sub __read_msg {
   }
 
   my $data;
-  $sock->read($data, $length);
-  confess("Error while reading from Bacula server: $!")
-    unless defined $data;
-
-  chomp $data;
+  my $total_bytes_to_read = $length;
+  my $total_bytes_read = 0;
+  while ($total_bytes_read < $total_bytes_to_read) {
+    my $buffer;
+    my $bytes_read = $sock->sysread($buffer, ($total_bytes_to_read + - $total_bytes_read));
+    $total_bytes_read += $bytes_read;
+    $data .= $buffer;
+  }
   warn "[RECV] '$data'" if $self->{debug};
 
   return $data;
@@ -96,12 +99,13 @@ sub __read_rec {
   my $sock = $self->{sock};
   
   my $filedata;
-  my $olddebug = $self->{debug};
-  delete $self->{debug};
   while (!$filedata) {
     my $rechdr = $self->__read_msg;
 
-    if (!$rechdr) { last; }
+    if (!$rechdr) {
+      warn "No rechdr. :(";
+      last;
+    }
 
     my  ($VolSessionId, $VolSessionTime, $file_index, $stream, $length) =
        ($rechdr =~ /^rechdr\s(\d+)\s(\d+)\s(\d+)\s(\d+)\s(\d+)$/);
@@ -110,10 +114,10 @@ sub __read_rec {
 
     if ($stream == 4) {
       anyinflate \$data => \$filedata
-        or die "trying\n";
+        or warn "Error unpacking\n";
+    } else {
     }
   }
-  $self->{debug} = $olddebug;
 
   return $filedata;
 }
@@ -214,7 +218,6 @@ sub __build_sock {
 
   $self->{sock} = $self->{builder}->($self)
     || confess("Could not connect to Bacula-Storage server at $self->{server}: $!");
-
 #  if (exists $self->{password} && exists $self->{director}) {
   try { $self->__auth("Hello Director $self->{director} calling", md5_hex($self->{password})) }
   catch {
@@ -309,6 +312,11 @@ sub lezen_pre {
 
 sub lezen_stream {
   my ($self) = @_;
+
+  my $olddebug = $self->{debug};
+  delete $self->{debug};
+  my $data = $self->__read_rec;
+  $self->{debug} = $olddebug;
 
   return $self->__read_rec;
 }
